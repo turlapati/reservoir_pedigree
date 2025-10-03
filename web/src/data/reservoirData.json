@@ -1,0 +1,86 @@
+[
+    {
+        "reservoir_id": 101,
+        "reservoir_name": "Emerald Lake (Standard Case)",
+        "inflow": "Whispering River, Stone Creek, Clearwater Reservoir",
+        "outflow": "Sunset Basin, Valley Canal",
+        "projects": "Hydroelectric Dam, Lake Fisheries Inc., Public Rec. Area"
+    },
+    {
+        "reservoir_id": 102,
+        "reservoir_name": "Springwater Basin (No Inflow)",
+        "inflow": "",
+        "outflow": "Orchard Creek, Meadowlands Aqueduct",
+        "projects": "Municipal Water Supply, Sailing Club"
+    },
+    {
+        "reservoir_id": 103,
+        "reservoir_name": "Salty Sink (No Outflow)",
+        "inflow": "Desertwash River, Brackish Creek",
+        "outflow": "",
+        "projects": "Salt Harvesting Operation, Wildlife Bird Sanctuary"
+    },
+    {
+        "reservoir_id": 104,
+        "reservoir_name": "Tranquil Mere (No Projects)",
+        "inflow": "Silent Stream, Quiet Brook",
+        "outflow": "Lazy River",
+        "projects": ""
+    },
+    {
+        "reservoir_id": 105,
+        "reservoir_name": "Confluence Point (Many Inflows)",
+        "inflow": "North Fork, South Fork, Granite Creek, Aspen Stream, Boulder Run, Eagle River, Pine Gulch",
+        "outflow": "Grand River",
+        "projects": "Whitewater Rafting Center"
+    },
+    {
+        "reservoir_id": 106,
+        "reservoir_name": "The Hub (Many Outflows)",
+        "inflow": "Titan River",
+        "outflow": "Farm Canal A, Farm Canal B, Western Aqueduct, Southern Pipeline, Sunken City Reservoir, Eastward Flow Channel",
+        "projects": "Central Pumping Station"
+    },
+    {
+        "reservoir_id": 107,
+        "reservoir_name": "Activity Lake (Many Projects)",
+        "inflow": "Rapid River",
+        "outflow": "Spillway Channel",
+        "projects": "Hydro Dam #1, Fisheries & Hatchery, National Rowing Course, Public Beach & Swim Area, Ferry Service, Water Skiing Zone, Lakeside Restaurant Complex"
+    },
+    {
+        "reservoir_id": 108,
+        "reservoir_name": "Isolated Pond (No Connections)",
+        "inflow": "",
+        "outflow": "",
+        "projects": ""
+    },
+    {
+        "reservoir_id": 109,
+        "reservoir_name": "The Great Reservoir (Complex Case)",
+        "inflow": "Mountain Torrent, Forest River, Valley Stream, Upland Creek, Lowland Runoff",
+        "outflow": "Metropolis Aqueduct, Industrial Canal, Agricultural Channel, Downstream Dam",
+        "projects": "Grand Hydroelectric Power Plant, Commercial Fishing Fleet, National Park Visitor Center, Water Treatment Facility, Environmental Research Station"
+    },
+    {
+        "reservoir_id": 110,
+        "reservoir_name": "Quarry Lake (Projects Only)",
+        "inflow": "",
+        "outflow": "",
+        "projects": "Scuba Diving School, Cliff Jumping Area"
+    },
+    {
+        "reservoir_id": 111,
+        "reservoir_name": "Simple Holding Pond (Minimal)",
+        "inflow": "Feeder Canal",
+        "outflow": "Exit Sluice",
+        "projects": "Water Quality Monitoring"
+    },
+    {
+        "reservoir_id": 112,
+        "reservoir_name": "Cascade Headwaters (Outflows Only)",
+        "inflow": "",
+        "outflow": "First Falls River, High Meadow Creek",
+        "projects": ""
+    }
+]
