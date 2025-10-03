@@ -1,3 +1,5 @@
+import reservoirDataJson from './reservoirData.json';
+
 // Define the interfaces for type safety
 export interface INode {
   id: string;
@@ -17,39 +19,93 @@ export interface IGraphData {
   links: ILink[];
 }
 
-// Sample data object
-export const reservoirData: IGraphData = {
-  nodes: [
-    // --- Central Node ---
-    { id: 'emerald_lake', label: 'Emerald Lake', type: 'main_reservoir' },
+export interface ReservoirConfig {
+  reservoir_id: number;
+  reservoir_name: string;
+  inflow: string;
+  outflow: string;
+  projects: string;
+}
 
-    // --- Inflows (Left side) ---
-    { id: 'whispering_river', label: 'Whispering River', type: 'inflow' },
-    { id: 'stone_creek', label: 'Stone Creek', type: 'inflow' },
-    { id: 'clearwater_reservoir', label: 'Clearwater Reservoir', type: 'inflow' },
+/**
+ * Parse a reservoir configuration from JSON into graph data format
+ */
+export function parseReservoirConfig(config: ReservoirConfig): IGraphData {
+  const nodes: IGraphData['nodes'] = [];
+  const links: IGraphData['links'] = [];
 
-    // --- Outflows (Right side) ---
-    { id: 'sunset_basin', label: 'Sunset Basin', type: 'outflow' },
-    { id: 'valley_canal', label: 'Valley Canal', type: 'outflow' },
+  // Create main reservoir node (use reservoir_id as unique id)
+  const mainNodeId = `reservoir_${config.reservoir_id}`;
+  nodes.push({
+    id: mainNodeId,
+    label: config.reservoir_name,
+    type: 'main_reservoir',
+  });
 
-    // --- Projects (Right side) ---
-    { id: 'hydro_dam', label: 'Hydroelectric Dam', type: 'project' },
-    { id: 'lake_fisheries', label: 'Lake Fisheries Inc.', type: 'project' },
-    { id: 'recreation_area', label: 'Public Rec. Area', type: 'project' },
-  ],
-  links: [
-    // --- Inflows to Main Reservoir ---
-    { source: 'whispering_river', target: 'emerald_lake' },
-    { source: 'stone_creek', target: 'emerald_lake' },
-    { source: 'clearwater_reservoir', target: 'emerald_lake' },
+  // Parse and add inflow nodes
+  if (config.inflow && config.inflow.trim()) {
+    const inflows = config.inflow.split(',').map((s) => s.trim());
+    inflows.forEach((inflow, index) => {
+      const inflowId = `inflow_${config.reservoir_id}_${index}`;
+      nodes.push({
+        id: inflowId,
+        label: inflow,
+        type: 'inflow',
+      });
+      links.push({
+        source: inflowId,
+        target: mainNodeId,
+      });
+    });
+  }
 
-    // --- Main Reservoir to Outflows ---
-    { source: 'emerald_lake', target: 'sunset_basin' },
-    { source: 'emerald_lake', target: 'valley_canal' },
+  // Parse and add outflow nodes
+  if (config.outflow && config.outflow.trim()) {
+    const outflows = config.outflow.split(',').map((s) => s.trim());
+    outflows.forEach((outflow, index) => {
+      const outflowId = `outflow_${config.reservoir_id}_${index}`;
+      nodes.push({
+        id: outflowId,
+        label: outflow,
+        type: 'outflow',
+      });
+      links.push({
+        source: mainNodeId,
+        target: outflowId,
+      });
+    });
+  }
 
-    // --- Main Reservoir to Projects ---
-    { source: 'emerald_lake', target: 'hydro_dam' },
-    { source: 'emerald_lake', target: 'lake_fisheries' },
-    { source: 'emerald_lake', target: 'recreation_area' },
-  ],
-};
+  // Parse and add project nodes
+  if (config.projects && config.projects.trim()) {
+    const projects = config.projects.split(',').map((s) => s.trim());
+    projects.forEach((project, index) => {
+      const projectId = `project_${config.reservoir_id}_${index}`;
+      nodes.push({
+        id: projectId,
+        label: project,
+        type: 'project',
+      });
+      links.push({
+        source: mainNodeId,
+        target: projectId,
+      });
+    });
+  }
+
+  return { nodes, links };
+}
+
+/**
+ * Get all available reservoir configurations
+ */
+export function getAllReservoirs(): ReservoirConfig[] {
+  return reservoirDataJson as ReservoirConfig[];
+}
+
+/**
+ * Get a specific reservoir configuration by ID
+ */
+export function getReservoirById(id: number): ReservoirConfig | undefined {
+  return reservoirDataJson.find((r) => r.reservoir_id === id);
+}

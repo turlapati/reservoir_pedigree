@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import ReservoirGraph from '@components/ReservoirGraph';
-import { getAllReservoirs, parseReservoirConfig } from '@data/reservoirDataParser';
+import { getAllReservoirs, parseReservoirConfig } from '@data/reservoirData';
 
 function App() {
   const reservoirs = useMemo(() => getAllReservoirs(), []);
