@@ -75,19 +75,21 @@ const ReservoirGraph = ({ data }: ReservoirGraphProps) => {
     // Create defs for arrowheads FIRST (before any other elements)
     const defs = svg.append('defs');
 
-    // Create arrowhead marker
-    defs
-      .append('marker')
-      .attr('id', 'arrowhead')
-      .attr('viewBox', '0 0 10 10')
-      .attr('refX', 10)
-      .attr('refY', 5)
-      .attr('markerWidth', 4)
-      .attr('markerHeight', 4)
-      .attr('orient', 'auto-start-reverse')
-      .append('path')
-      .attr('d', 'M 0 0 L 10 5 L 0 10 z')
-      .attr('fill', 'context-stroke');
+    // Create arrowhead markers for each type
+    Object.entries(COLOR_MAP).forEach(([type, colors]) => {
+      defs
+        .append('marker')
+        .attr('id', `arrowhead-${type}`)
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 10)
+        .attr('refY', 5)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+        .attr('fill', colors.stroke);
+    });
 
     const nodes: INode[] = data.nodes.map((d) => Object.create(d));
     const links: ILink[] = data.links.map((d) => Object.create(d));
@@ -194,25 +196,17 @@ const ReservoirGraph = ({ data }: ReservoirGraphProps) => {
     
     zoomBehaviorRef.current = zoomBehavior;
 
-    // Draw links with right-angle connectors
-    const linkGroup = mainGroup.append('g').attr('class', 'links');
-
-    links.forEach((link) => {
+    // Function to calculate path data for a link
+    const calculatePathData = (link: ILink) => {
       const source = nodes.find((n) => n.id === link.source);
       const target = nodes.find((n) => n.id === link.target);
-      if (!source || !target) return;
-
-      const targetType = target.type === 'main_reservoir' 
-        ? (source.type === 'inflow' ? 'inflow' : source.type)
-        : target.type;
-      
-      const color = COLOR_MAP[targetType as keyof typeof COLOR_MAP];
+      if (!source || !target) return '';
 
       // Create right-angle path
       let x1 = source.fx!;
       let y1 = source.fy!;
-      const x2 = target.fx!;
-      const y2 = target.fy!;
+      let x2 = target.fx!;
+      let y2 = target.fy!;
       
       // For outflows from main node, start from top-right of rectangle
       // For projects from main node, start from bottom-right of rectangle
@@ -226,26 +220,82 @@ const ReservoirGraph = ({ data }: ReservoirGraphProps) => {
         }
       }
       
+      // For inflows to main node, end at left edge of rectangle
+      if (target.type === 'main_reservoir') {
+        x2 = target.fx! - LAYOUT.MAIN_RECT_WIDTH / 2;
+      } else {
+        // For other nodes (circles), stop before the node radius
+        x2 = x2 - LAYOUT.NODE_RADIUS;
+      }
+      
       // Calculate midpoint for right angle
       const midX = (x1 + x2) / 2;
       
       // Create path with right angles: horizontal from source, vertical turn, horizontal to target
-      const pathData = `M ${x1},${y1} L ${midX},${y1} L ${midX},${y2} L ${x2},${y2}`;
+      return `M ${x1},${y1} L ${midX},${y1} L ${midX},${y2} L ${x2},${y2}`;
+    };
+
+    // Draw links with right-angle connectors
+    const linkGroup = mainGroup.append('g').attr('class', 'links');
+
+    links.forEach((link) => {
+      const source = nodes.find((n) => n.id === link.source);
+      const target = nodes.find((n) => n.id === link.target);
+      if (!source || !target) return;
+
+      const targetType = target.type === 'main_reservoir' 
+        ? (source.type === 'inflow' ? 'inflow' : source.type)
+        : target.type;
+      
+      const color = COLOR_MAP[targetType as keyof typeof COLOR_MAP];
+      const pathData = calculatePathData(link);
 
       linkGroup
         .append('path')
+        .attr('class', `link-${link.source}-${link.target}`)
         .attr('d', pathData)
         .attr('fill', 'none')
         .attr('stroke', color.stroke)
         .attr('stroke-width', 2)
-        .attr('stroke-dasharray', '5,3');
+        .attr('stroke-dasharray', '5,3')
+        .attr('marker-end', `url(#arrowhead-${targetType})`);
     });
+
+    // Function to update all links connected to a node
+    const updateLinks = () => {
+      links.forEach((link) => {
+        const pathData = calculatePathData(link);
+        linkGroup
+          .select(`.link-${link.source}-${link.target}`)
+          .attr('d', pathData);
+      });
+    };
+
+    // Create drag behavior
+    const dragBehavior = d3.drag<SVGGElement, INode>()
+      .on('start', function(event, d) {
+        d3.select(this).raise().style('cursor', 'grabbing');
+      })
+      .on('drag', function(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+        d3.select(this).attr('transform', `translate(${d.fx},${d.fy})`);
+        updateLinks();
+      })
+      .on('end', function(event, d) {
+        d3.select(this).style('cursor', 'grab');
+      });
 
     // Draw nodes
     const nodeGroup = mainGroup.append('g').attr('class', 'nodes');
 
     nodes.forEach((node) => {
-      const g = nodeGroup.append('g').attr('transform', `translate(${node.fx},${node.fy})`);
+      const g = nodeGroup
+        .append('g')
+        .attr('transform', `translate(${node.fx},${node.fy})`)
+        .style('cursor', 'grab')
+        .datum(node)
+        .call(dragBehavior);
 
       if (node.type === 'main_reservoir') {
         // Draw rounded rectangle for main reservoir
